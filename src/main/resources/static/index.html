@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistem Notificari</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body style="font-family: Arial;">
+<h1>Notificari Live</h1>
+<div id="box" style="border: 1px solid #ccc; height: 300px; padding: 10px;"></div>
+
+<script>
+    // Conectare la endpoint-ul definit in Java
+    var socket = new SockJS('/ws');
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('Conectat!');
+        // Abonare la canalul unde Java trimite mesaje
+        stompClient.subscribe('/topic/alerts', function (notificare) {
+            var div = document.getElementById("box");
+            div.innerHTML += "<p style='color:red'>🔔 " + notificare.body + "</p>";
+        });
+    });
+</script>
+</body>
+</html>
