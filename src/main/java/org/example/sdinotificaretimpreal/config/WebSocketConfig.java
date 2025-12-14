@@ -1,4 +1,4 @@
-package org.example.sdinotificaretimpreal.config; // ATENTIE LA LINIA ASTA
+package org.example.sdinotificaretimpreal.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

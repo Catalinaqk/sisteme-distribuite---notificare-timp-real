@@ -1,27 +1,675 @@
 <!DOCTYPE html>
-<html>
+<html lang="ro">
 <head>
-    <title>Sistem Notificari</title>
+    <meta charset="UTF-8">
+    <title>GlovoDist - Mega Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; padding-bottom: 80px; }
+        .hidden { display: none !important; }
+
+        /* Categorie Header */
+        .cat-header {
+            background: linear-gradient(90deg, #fff, #f8f9fa);
+            border-left: 5px solid;
+            padding: 10px; margin-top: 40px; margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Product Card */
+        .product-card { transition: transform 0.2s; cursor: pointer; border: none; overflow: hidden; height: 100%; }
+        .product-card:active { transform: scale(0.95); }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        .product-img {
+            height: 100px; background-color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3.5rem; border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* Floating Cart Button */
+        .fab-cart {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            background-color: #0ecb81; color: white; border-radius: 50px;
+            padding: 15px 25px; box-shadow: 0 4px 15px rgba(14, 203, 129, 0.4);
+            cursor: pointer; font-weight: bold; transition: all 0.3s;
+        }
+        .fab-cart:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(14, 203, 129, 0.6); }
+
+        /* Restaurant Card */
+        .address-box { background-color: #f8f9fa; border: 1px dashed #ced4da; padding: 8px; border-radius: 5px; font-size: 0.9rem; }
+    </style>
 </head>
-<body style="font-family: Arial;">
-<h1>Notificari Live</h1>
-<div id="box" style="border: 1px solid #ccc; height: 300px; padding: 10px;"></div>
+<body>
+
+<nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container">
+            <span class="navbar-brand fw-bold">
+                <i class="fas fa-motorcycle text-warning me-2"></i>Glovo<span class="text-info">Dist</span>
+            </span>
+        <div class="d-flex align-items-center bg-secondary px-3 py-1 rounded">
+            <span class="text-white small me-2">ROL:</span>
+            <select id="roleSelector" class="form-select form-select-sm fw-bold" style="width: 130px;" onchange="changeRole()">
+                <option value="CLIENT">Client 🙍‍♂️</option>
+                <option value="RESTAURANT">Restaurant 👨‍🍳</option>
+            </select>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <div id="client-view">
+
+        <h4 class="cat-header text-danger border-danger"><i class="fas fa-pizza-slice me-2"></i>Pizza & Paste</h4>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Pizza Diavola', 35, '🍕')">
+                    <div class="product-img text-danger"><i class="fas fa-fire"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Diavola</h6><small class="text-success fw-bold">35 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Quattro Formaggi', 38, '🧀')">
+                    <div class="product-img text-warning"><i class="fas fa-cheese"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Quattro</h6><small class="text-success fw-bold">38 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Pizza Margherita', 28, '🍅')">
+                    <div class="product-img text-danger"><i class="fas fa-leaf"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Margherita</h6><small class="text-success fw-bold">28 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Pizza Carnivora', 42, '🥩')">
+                    <div class="product-img text-dark"><i class="fas fa-drumstick-bite"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Carnivora</h6><small class="text-success fw-bold">42 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Pizza Hawaii', 34, '🍍')">
+                    <div class="product-img text-warning"><i class="fas fa-lemon"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Hawaii</h6><small class="text-success fw-bold">34 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Prosciutto Funghi', 36, '🍄')">
+                    <div class="product-img text-secondary"><i class="fas fa-circle"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Prosciutto</h6><small class="text-success fw-bold">36 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Calzone', 35, '🥟')">
+                    <div class="product-img text-warning"><i class="fas fa-bread-slice"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Calzone</h6><small class="text-success fw-bold">35 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Pizza Vegetariana', 32, '🥗')">
+                    <div class="product-img text-success"><i class="fas fa-carrot"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Vegetariana</h6><small class="text-success fw-bold">32 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Paste Carbonara', 33, '🍝')">
+                    <div class="product-img text-warning"><i class="fas fa-bacon"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Carbonara</h6><small class="text-success fw-bold">33 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Lasagna', 36, '🟧')">
+                    <div class="product-img text-danger"><i class="fas fa-layer-group"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Lasagna</h6><small class="text-success fw-bold">36 RON</small></div>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="cat-header text-dark border-dark"><i class="fas fa-hamburger me-2"></i>Burgeri & Grill</h4>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Cheeseburger', 28, '🍔')">
+                    <div class="product-img text-warning"><i class="fas fa-hamburger"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Cheeseburger</h6><small class="text-success fw-bold">28 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Double Burger', 40, '🥯')">
+                    <div class="product-img text-dark"><i class="fas fa-hamburger"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Double XL</h6><small class="text-success fw-bold">40 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Crispy Chicken', 30, '🍗')">
+                    <div class="product-img text-warning"><i class="fas fa-drumstick-bite"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Crispy Strips</h6><small class="text-success fw-bold">30 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Aripioare (6 buc)', 25, '🌶️')">
+                    <div class="product-img text-danger"><i class="fas fa-fire-alt"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Wings (6)</h6><small class="text-success fw-bold">25 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Coaste Porc BBQ', 55, '🍖')">
+                    <div class="product-img text-dark"><i class="fas fa-bone"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Ribs BBQ</h6><small class="text-success fw-bold">55 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Mici cu Mustar (4)', 25, '🥖')">
+                    <div class="product-img text-dark"><i class="fas fa-bread-slice"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Mici (4 buc)</h6><small class="text-success fw-bold">25 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Halloumi Burger', 32, '🧀')">
+                    <div class="product-img text-success"><i class="fas fa-cheese"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Halloumi Veg</h6><small class="text-success fw-bold">32 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Hot Dog XXL', 20, '🌭')">
+                    <div class="product-img text-danger"><i class="fas fa-hotdog"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Hot Dog XXL</h6><small class="text-success fw-bold">20 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Cartofi Prajiti', 10, '🍟')">
+                    <div class="product-img text-warning"><i class="fas fa-box"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Cartofi Prăjiți</h6><small class="text-success fw-bold">10 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Inele Ceapa', 12, '⭕')">
+                    <div class="product-img text-warning"><i class="fas fa-ring"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Inele Ceapă</h6><small class="text-success fw-bold">12 RON</small></div>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="cat-header text-info border-info"><i class="fas fa-ice-cream me-2"></i>Desert</h4>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Papanasi', 22, '🍩')">
+                    <div class="product-img text-danger"><i class="fas fa-dot-circle"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Papanași</h6><small class="text-success fw-bold">22 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Lava Cake', 18, '🍫')">
+                    <div class="product-img text-dark"><i class="fas fa-cookie"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Lava Cake</h6><small class="text-success fw-bold">18 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Clatite', 18, '🥞')">
+                    <div class="product-img text-warning"><i class="fas fa-stroopwafel"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Clătite</h6><small class="text-success fw-bold">18 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Cheesecake', 21, '🍰')">
+                    <div class="product-img text-danger"><i class="fas fa-birthday-cake"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Cheesecake</h6><small class="text-success fw-bold">21 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Tiramisu', 20, '☕')">
+                    <div class="product-img text-secondary"><i class="fas fa-mug-hot"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Tiramisu</h6><small class="text-success fw-bold">20 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Profiterol', 24, '🧁')">
+                    <div class="product-img text-dark"><i class="fas fa-ice-cream"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Profiterol</h6><small class="text-success fw-bold">24 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Ecler Ciocolata', 15, '🥖')">
+                    <div class="product-img text-dark"><i class="fas fa-bread-slice"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Ecler</h6><small class="text-success fw-bold">15 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Inghetata Cupa', 12, '🍦')">
+                    <div class="product-img text-info"><i class="fas fa-ice-cream"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Înghețată</h6><small class="text-success fw-bold">12 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Salata Fructe', 16, '🍉')">
+                    <div class="product-img text-success"><i class="fas fa-apple-alt"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Fructe</h6><small class="text-success fw-bold">16 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Mousse Choco', 19, '🥣')">
+                    <div class="product-img text-dark"><i class="fas fa-poo"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Mousse</h6><small class="text-success fw-bold">19 RON</small></div>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="cat-header text-primary border-primary"><i class="fas fa-wine-bottle me-2"></i>Băuturi</h4>
+        <div class="row g-3 mb-5">
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Cola', 8, '🥤')">
+                    <div class="product-img text-dark"><i class="fas fa-wine-bottle"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Cola</h6><small class="text-success fw-bold">8 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Cola Zero', 8, '🥤')">
+                    <div class="product-img text-dark"><i class="fas fa-wine-bottle"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Cola Zero</h6><small class="text-success fw-bold">8 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Fanta', 8, '🟠')">
+                    <div class="product-img text-warning"><i class="fas fa-tint"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Fanta</h6><small class="text-success fw-bold">8 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Sprite', 8, '🍋')">
+                    <div class="product-img text-success"><i class="fas fa-tint"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Sprite</h6><small class="text-success fw-bold">8 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Apa Plata', 6, '💧')">
+                    <div class="product-img text-info"><i class="fas fa-tint"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Apă Plată</h6><small class="text-success fw-bold">6 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Apa Minerala', 6, '🫧')">
+                    <div class="product-img text-info"><i class="fas fa-spray-can"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Apă Minerală</h6><small class="text-success fw-bold">6 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Bere Blonda', 10, '🍺')">
+                    <div class="product-img text-warning"><i class="fas fa-beer"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Bere Blondă</h6><small class="text-success fw-bold">10 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Bere Bruna', 12, '🍺')">
+                    <div class="product-img text-dark"><i class="fas fa-beer"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Bere Brună</h6><small class="text-success fw-bold">12 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Vin Rosu', 45, '🍷')">
+                    <div class="product-img text-danger"><i class="fas fa-wine-glass-alt"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Vin Roșu</h6><small class="text-success fw-bold">45 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Vin Alb', 45, '🥂')">
+                    <div class="product-img text-warning"><i class="fas fa-wine-glass"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Vin Alb</h6><small class="text-success fw-bold">45 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Energizant', 12, '⚡')">
+                    <div class="product-img text-dark"><i class="fas fa-bolt"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Energizant</h6><small class="text-success fw-bold">12 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Limonada', 15, '🍋')">
+                    <div class="product-img text-warning"><i class="fas fa-lemon"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Limonadă</h6><small class="text-success fw-bold">15 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Fresh Portocale', 18, '🍊')">
+                    <div class="product-img text-warning"><i class="fas fa-glass-whiskey"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Fresh</h6><small class="text-success fw-bold">18 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Ice Tea', 9, '🧊')">
+                    <div class="product-img text-warning"><i class="fas fa-leaf"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Ice Tea</h6><small class="text-success fw-bold">9 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Cafea Espresso', 8, '☕')">
+                    <div class="product-img text-dark"><i class="fas fa-coffee"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Espresso</h6><small class="text-success fw-bold">8 RON</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card product-card shadow-sm" onclick="addToCart('Cappuccino', 10, '☕')">
+                    <div class="product-img text-secondary"><i class="fas fa-mug-hot"></i></div>
+                    <div class="card-body p-2 text-center"><h6 class="m-0">Cappuccino</h6><small class="text-success fw-bold">10 RON</small></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 border-top pt-3">
+            <h5><i class="fas fa-history me-2"></i>Status Comenzi Active</h5>
+            <div id="my-orders-list" class="text-muted small">Nicio comandă activă.</div>
+        </div>
+
+        <div class="fab-cart hidden" id="cartButton" onclick="openCheckoutModal()">
+            <i class="fas fa-shopping-basket me-2"></i>
+            <span id="cartTotal">0 RON</span>
+            <span class="badge bg-white text-success ms-2 rounded-pill" id="cartCount">0</span>
+        </div>
+    </div>
+
+    <div id="restaurant-view" class="hidden">
+        <div class="alert alert-warning shadow-sm">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-concierge-bell fa-2x me-3"></i>
+                <div>
+                    <strong>Restaurant Dashboard</strong>
+                    <div class="small">Urmărește adresele și lista de produse.</div>
+                </div>
+            </div>
+        </div>
+        <div id="incoming-orders" class="row"></div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="checkoutModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">Finalizare Comandă</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="border-bottom pb-2">Coșul tău:</h6>
+                <ul id="cartItemsList" class="list-group mb-3 list-group-flush"></ul>
+                <div class="text-end fw-bold mb-3 fs-5">Total: <span id="modalCartTotal" class="text-success">0</span> RON</div>
+
+                <div class="bg-light p-3 rounded border">
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Numele Tău</label>
+                        <input type="text" id="clientName" class="form-control" placeholder="ex: Ion Popescu">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Adresa de Livrare</label>
+                        <textarea id="clientAddress" class="form-control" rows="2" placeholder="ex: Str. Libertății nr. 10, Ap 4, Interfon 04"></textarea>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-bold">Mențiuni (Alergii)</label>
+                        <input type="text" id="clientMentions" class="form-control" placeholder="ex: Fără ceapă...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mai comand</button>
+                <button type="button" class="btn btn-success w-100 fw-bold py-2" onclick="sendOrder()">
+                    TRIMITE COMANDA <i class="fas fa-paper-plane ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-    // Conectare la endpoint-ul definit in Java
     var socket = new SockJS('/ws');
     var stompClient = Stomp.over(socket);
+    var currentRole = "CLIENT";
+    var myClientId = Math.floor(Math.random() * 100000);
+
+    // --- SHOPPING CART LOGIC ---
+    var cart = []; // Aici tinem produsele selectate
+
+    // Bootstrap modal instance
+    var checkoutModal;
+    document.addEventListener('DOMContentLoaded', function() {
+        checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+    });
 
     stompClient.connect({}, function (frame) {
-        console.log('Conectat!');
-        // Abonare la canalul unde Java trimite mesaje
-        stompClient.subscribe('/topic/alerts', function (notificare) {
-            var div = document.getElementById("box");
-            div.innerHTML += "<p style='color:red'>🔔 " + notificare.body + "</p>";
+        stompClient.subscribe('/topic/alerts', function (payload) {
+            var data = JSON.parse(payload.body);
+            handleNetworkMessage(data);
         });
     });
+
+    function changeRole() {
+        currentRole = document.getElementById("roleSelector").value;
+        document.getElementById("client-view").classList.toggle("hidden", currentRole !== 'CLIENT');
+        document.getElementById("restaurant-view").classList.toggle("hidden", currentRole !== 'RESTAURANT');
+        // Ascundem butonul de cart la restaurant
+        if(currentRole === 'RESTAURANT') document.getElementById("cartButton").classList.add("hidden");
+        else if(cart.length > 0) document.getElementById("cartButton").classList.remove("hidden");
+    }
+
+    // --- 1. ADAUGA IN COS ---
+    function addToCart(name, price, icon) {
+        cart.push({ name: name, price: price, icon: icon });
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        var btn = document.getElementById("cartButton");
+        var total = cart.reduce((acc, item) => acc + item.price, 0);
+
+        document.getElementById("cartCount").innerText = cart.length;
+        document.getElementById("cartTotal").innerText = total + " RON";
+
+        if (cart.length > 0) btn.classList.remove("hidden");
+        else btn.classList.add("hidden");
+    }
+
+    // --- 2. DESCHIDE CHECKOUT ---
+    function openCheckoutModal() {
+        var list = document.getElementById("cartItemsList");
+        list.innerHTML = "";
+        var total = 0;
+
+        cart.forEach((item, index) => {
+            total += item.price;
+            list.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>${item.icon} ${item.name}</div>
+                        <span class="fw-bold">${item.price} RON</span>
+                    </li>`;
+        });
+        document.getElementById("modalCartTotal").innerText = total;
+        checkoutModal.show();
+    }
+
+    // --- 3. TRIMITE COMANDA COMPLETA ---
+    function sendOrder() {
+        var name = document.getElementById("clientName").value;
+        var address = document.getElementById("clientAddress").value;
+        var mentions = document.getElementById("clientMentions").value;
+
+        if(!name || !address) {
+            alert("Te rugăm să completezi Numele și Adresa!");
+            return;
+        }
+
+        var orderData = {
+            type: "NEW_ORDER",
+            orderId: Date.now(),
+            items: cart, // Trimitem tot vectorul de produse
+            clientName: name,
+            address: address,
+            mentions: mentions,
+            status: "Pending",
+            timeEstimate: "Calcul...",
+            clientId: myClientId
+        };
+
+        fetch('/send', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(orderData)
+        });
+
+        // Reset
+        cart = [];
+        updateCartUI();
+        checkoutModal.hide();
+        alert("Comanda a fost trimisă!");
+    }
+
+    // --- 4. LOGICA RESTAURANT - ACTION BUTTONS ---
+    function nextStatus(orderId, currentStatus, clientId) {
+        var timeInput = document.getElementById("time-" + orderId);
+        var timeVal = timeInput ? timeInput.value : "";
+        var newStatus = "";
+        var finalTime = timeVal ? timeVal + " min" : "?? min";
+
+        if(currentStatus === 'NEW') {
+            newStatus = "PREPARING";
+            if(!timeVal) finalTime = "45 min";
+        } else if(currentStatus === 'PREPARING') {
+            newStatus = "DELIVERING";
+            if(!timeVal) finalTime = "20 min";
+        } else if(currentStatus === 'DELIVERING') {
+            newStatus = "DONE";
+            finalTime = "Livrat";
+        }
+
+        var updateData = {
+            type: "UPDATE_STATUS",
+            orderId: orderId,
+            status: newStatus,
+            timeEstimate: finalTime,
+            clientId: clientId
+        };
+
+        fetch('/send', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(updateData)
+        });
+    }
+
+    // --- 5. RENDERIZARE ---
+    function handleNetworkMessage(data) {
+        // Render Restaurant
+        if (currentRole === 'RESTAURANT' && data.type === "NEW_ORDER") {
+            renderRestaurantCard(data);
+        }
+        if (currentRole === 'RESTAURANT' && data.type === "UPDATE_STATUS") {
+            updateRestaurantCardStatus(data);
+        }
+
+        // Render Client
+        if (currentRole === 'CLIENT' && data.clientId === myClientId) {
+            renderClientCard(data);
+        }
+    }
+
+    function renderClientCard(data) {
+        var list = document.getElementById("my-orders-list");
+        if(list.innerText.includes("Nicio")) list.innerHTML = "";
+
+        var existing = document.getElementById('client-order-' + data.orderId);
+
+        var progress=5; var color="bg-secondary"; var text="În așteptare confirmare...";
+        if(data.status === 'PREPARING') { progress=40; color="bg-warning"; text="Se Gătește"; }
+        else if(data.status === 'DELIVERING') { progress=80; color="bg-info"; text="Curierul vine"; }
+        else if(data.status === 'DONE') { progress=100; color="bg-success"; text="Livrat!"; }
+
+        if (existing) {
+            existing.querySelector('.progress-bar').style.width = progress + "%";
+            existing.querySelector('.progress-bar').className = "progress-bar " + color;
+            existing.querySelector('.status-text').innerText = text;
+            existing.querySelector('.time-est').innerText = data.timeEstimate;
+        } else if (data.items) {
+            // Afisam primele 2 produse si "+ X altele" daca sunt multe
+            var itemsSummary = "";
+            if(data.items.length > 2) {
+                itemsSummary = data.items.slice(0, 2).map(i => `<span class="badge bg-light text-dark border me-1">${i.icon} ${i.name}</span>`).join('') + ` <span class="badge bg-secondary">+ încă ${data.items.length - 2}</span>`;
+            } else {
+                itemsSummary = data.items.map(i => `<span class="badge bg-light text-dark border me-1">${i.icon} ${i.name}</span>`).join('');
+            }
+
+            var html = `
+                <div class="card mb-3 order-card shadow-sm" id="client-order-${data.orderId}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="fw-bold m-0">Comanda #${data.orderId.toString().slice(-4)}</h6>
+                            <span class="status-text badge ${color} text-dark">${text}</span>
+                        </div>
+                        <div class="mb-2">${itemsSummary}</div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar ${color}" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="mt-2 small text-muted"><i class="fas fa-clock"></i> Timp estimat: <span class="time-est fw-bold text-dark">${data.timeEstimate}</span></div>
+                    </div>
+                </div>`;
+            list.prepend(toElement(html));
+        }
+    }
+
+    function renderRestaurantCard(data) {
+        var list = document.getElementById("incoming-orders");
+
+        var total = data.items.reduce((acc, i) => acc + i.price, 0);
+        var itemsList = data.items.map(i => `<li>${i.icon} ${i.name}</li>`).join('');
+        var mentionsHtml = data.mentions ? `<div class="alert alert-danger p-1 mt-2 mb-0 small"><i class="fas fa-exclamation"></i> ${data.mentions}</div>` : '';
+
+        var html = `
+            <div class="col-md-6 mb-3" id="rest-card-${data.orderId}">
+                <div class="card shadow h-100 border-warning">
+                    <div class="card-header bg-warning bg-opacity-25 d-flex justify-content-between align-items-center">
+                        <strong>#${data.orderId.toString().slice(-4)} - ${data.clientName}</strong>
+                        <span class="badge bg-dark">${total} RON</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="address-box mb-2">
+                            <i class="fas fa-map-marker-alt text-danger"></i> <strong>Adresă:</strong><br>
+                            ${data.address}
+                        </div>
+                        <div style="max-height: 150px; overflow-y: auto;">
+                             <ul class="small ps-3 mb-2">${itemsList}</ul>
+                        </div>
+                        ${mentionsHtml}
+
+                        <div class="mt-3 pt-2 border-top">
+                            <label class="small fw-bold">Timp estimat (min):</label>
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="number" class="form-control" id="time-${data.orderId}" placeholder="45" value="45">
+                                <button class="btn btn-primary" onclick="nextStatus(${data.orderId}, 'NEW', ${data.clientId})">Acceptă & Gătește</button>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-info btn-sm flex-grow-1 text-white" onclick="nextStatus(${data.orderId}, 'PREPARING', ${data.clientId})">Curier</button>
+                                <button class="btn btn-success btn-sm flex-grow-1" onclick="nextStatus(${data.orderId}, 'DELIVERING', ${data.clientId})">Final</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        list.prepend(toElement(html));
+    }
+
+    function updateRestaurantCardStatus(data) {
+        var card = document.getElementById("rest-card-" + data.orderId);
+        if(card && data.status === "DONE") {
+            card.remove();
+        }
+    }
+
+    function toElement(html) {
+        var template = document.createElement('template');
+        html = html.trim();
+        template.innerHTML = html;
+        return template.content.firstChild;
+    }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

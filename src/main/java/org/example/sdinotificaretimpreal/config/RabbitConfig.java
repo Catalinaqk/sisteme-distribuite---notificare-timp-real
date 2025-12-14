@@ -1,4 +1,4 @@
-package org.example.sdinotificaretimpreal.config; // ATENTIE LA LINIA ASTA
+package org.example.sdinotificaretimpreal.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
-    public static final String QUEUE_NAME = "notificari_queue";
-    public static final String EXCHANGE_NAME = "notificari_exchange";
+    public static final String QUEUE_NAME = "delivery_queue";
+    public static final String EXCHANGE_NAME = "delivery_exchange";
 
     @Bean
     public Queue queue() { return new Queue(QUEUE_NAME, false); }
@@ -17,6 +17,6 @@ public class RabbitConfig {
 
     @Bean
     public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with("notificari.#");
+        return BindingBuilder.bind(queue).to(exchange).with("orders.#");
     }
 }
